@@ -1,5 +1,7 @@
 package {
 	
+	import flash.utils.*;
+	
 	public class AnimationKeyframeFinder {
 		
 		private var animations:Object = {};
@@ -54,7 +56,12 @@ package {
 			
 			//build each line of css
 			for(var k in properties){
-				tmpKeyframe.props.push(properties[k].replace("^" , object[k]) +";\n");
+				//if it doesn't match
+				if(properties[k].indexOf("^") === -1){
+					tmpKeyframe.props.push(properties[k] +";\n");
+				}else{
+					tmpKeyframe.props.push(properties[k].replace("^" , object[k]) +";\n");
+				}
 			}
 			
 			//push this tmpkeyframe into this animation's frames' property
@@ -101,21 +108,20 @@ package {
 			trace(reply);
 			
 			
-			//keyframes with rounded animation duration
-			var implement = ".animate-" + keyframeName + " {\n";
-				implement += "	@include animation(" + keyframeName + " " + animations[keyframeName].duration + "s forwards);\n";
-				implement += "	@include animation-delay(" + animations[keyframeName].delay + "s);\n"
-				implement += "}";
+			//delay these 10 milliseconds times the number of frames you setting, just to be sure
+			setTimeout(function(){
+				//keyframes with rounded animation duration
+				var implement = ".animate-" + keyframeName + " {\n";
+					implement += "	@include animation(" + keyframeName + " " + animations[keyframeName].duration + "s forwards);\n";
+					implement += "	@include animation-delay(" + animations[keyframeName].delay + "s);\n"
+					implement += "}";
 			
-			trace(implement);
+				trace(implement);
+			}, animations[keyframeName].frames.length * 10);
+			
 				
 			
 			//END and Profit!
-			
 		}
-
 	}
-	
-	
-	
 }
