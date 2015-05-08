@@ -102,6 +102,9 @@ package {
 			for(var i in animations[keyframeName].frames){
 				reply += "	" + frameToPerc(animations[keyframeName].frames, i) +" {\n"
 				reply += "		" + animations[keyframeName].frames[i].props.join("		");
+				
+				reply += "		@include animation-timing-function(" + (animations[keyframeName].frames[i].ease || "linear") + ");\n"
+				
 				reply += "	}\n"
 			}
 			reply += "\n}";			
