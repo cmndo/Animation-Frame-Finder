@@ -18,7 +18,7 @@ package {
 			private functions
 		*/
 		private function frameToTime(num) {
-			return ((Math.round((num / _this.stage.frameRate)*100))/100)
+			return ((((num / _this.stage.frameRate)*100))/100)
 		}
 		
 		/*
@@ -34,7 +34,7 @@ package {
 				}
 			}else{
 				
-				return 	Math.round(((frames[index].num - frames[0].num) / (frames[frames.length - 1].num - frames[0].num)) * 100) + "%"
+				return 	(((frames[index].num - frames[0].num) / (frames[frames.length - 1].num - frames[0].num)) * 100) + "%"
 			}
 			return 1337;
 		}
