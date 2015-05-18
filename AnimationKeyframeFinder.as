@@ -1,3 +1,24 @@
+/*
+	//for less consider these mixins
+	.m-keyframes(@name; @arguments) {
+		@-moz-keyframes @name {
+			@arguments();
+		}
+		@-webkit-keyframes @name {
+			@arguments();
+		}
+		@keyframes @name {
+	        	@arguments();
+	        }
+	}
+	
+	.m-animation(@arguments) {
+		-webkit-animation: @arguments;
+		-moz-animation: @arguments;
+		animation: @arguments;
+	}
+
+*/
 package {
 	
 	import flash.utils.*;
@@ -6,12 +27,14 @@ package {
 		
 		private var animations:Object = {};
 		private var _this = undefined;
+		private var _precompiler = undefined;
 		
 		/*
 			constructor
 		*/
-		public function AnimationKeyframeFinder(timeline) {
+		public function AnimationKeyframeFinder(timeline, precompiler:String = "scss") {
 			_this = timeline;
+			_precompiler = precompiler;
 		}
 		
 		/*
@@ -96,26 +119,50 @@ package {
 			
 			
 			// Loop through added keyframes and compile the css properties we stored.		
-			var reply = "@include keyframes("+keyframeName+"){\n"
+			var reply;
+			if(_precompiler == "scss"){
+				reply = "@include keyframes("+keyframeName+"){\n" 
+			}else if(_precompiler == "less"){
+				reply = ".m-keyframes("+keyframeName+"; {\n"
+			}
 			
 			for(var i in animations[keyframeName].frames){
 				reply += "	" + frameToPerc(animations[keyframeName].frames, i) +" {\n";
-				reply += "		" + animations[keyframeName].frames[i].props.join("		");				
-				reply += "		@include animation-timing-function(" + (animations[keyframeName].frames[i].ease || "linear") + ");\n";				
+				reply += "		" + animations[keyframeName].frames[i].props.join("		");			
+				if(_precompiler == "scss"){
+					reply += "		@include animation-timing-function(" + (animations[keyframeName].frames[i].ease || "linear") + ");\n";	
+				}else if(_precompiler == "less"){
+					reply += "		animation-timing-function: " + (animations[keyframeName].frames[i].ease || "linear") + ";\n";	
+				}							
 				reply += "	}\n";
 			}
 			
-			reply += "\n}";			
+			if(_precompiler == "scss"){
+				reply += "\n}";
+			}else if(_precompiler == "less"){
+				reply += "\n});";
+			}
+						
 			trace(reply);
 			
 			
 			//delay the output of these 10 milliseconds for each frame (for big animations).
 			setTimeout(function(){
+				var implement;
 				
-				var implement = ".animate-" + keyframeName + " {\n";
+				if(_precompiler == "scss"){
+					implement = ".animate-" + keyframeName + " {\n";
 					implement += "	@include animation(" + keyframeName + " " + animations[keyframeName].duration + "s forwards);\n";
 					implement += "	@include animation-delay(" + animations[keyframeName].delay + "s);\n"
+					implement += "}";					
+				}else if(_precompiler == "less"){
+					implement = ".animate--" + keyframeName + " {\n";
+					implement += "	.m-animation (" + keyframeName + " " + animations[keyframeName].duration + "s 1 "+animations[keyframeName].delay+"s);\n";
 					implement += "}";
+					
+				}	   
+				
+				
 			
 				trace(implement);
 				
